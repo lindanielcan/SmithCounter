@@ -1,5 +1,5 @@
 //Roughly write out the project structure. Algorithms will be imported later.
-
+// I got a good reference from https://web.njit.edu/~rlopes/Mod5.3.pdf 
 
 #include <iostream>
 #include <string>
@@ -73,8 +73,6 @@ int main(){
   string t1;
 
   ifstream file("branch_trace.dat");
-
-
 
    file.close();
 
