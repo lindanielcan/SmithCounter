@@ -1,10 +1,14 @@
 //Roughly write out the project structure. Algorithms will be imported later.
-// I got a good reference from https://web.njit.edu/~rlopes/Mod5.3.pdf 
+// I got a good reference from https://web.njit.edu/~rlopes/Mod5.3.pdf
+
+// 00 strongly not taken
+// 01 weakly taken
+// 10 weakly taken
+// 11 strongly taken
 
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <string>
 
 using namespace std;
 
@@ -66,16 +70,27 @@ class BranchTracker{
 };
 
 
-int main(){
+int main(int argc, char* argv[]) {
 
-  SmithCounter S1;
+  SmithCounter S1[128];
   BranchTracker B1;
-  string t1;
+  string branch;
+  string state;
+  int b_ins;
+  bool prediction;
+  bool predictionTaken;
 
   ifstream file("branch_trace.dat");
 
-   file.close();
 
+  while(getline(file, branch, ' ')) {
+
+       getline(file, state, '\n');
+       b_ins = atoi(branch.c_str());
+       prediction = smith_array[(b_ins/4) % 128].getPrediction();
+   }
+
+  file.close();
 
   cout << "Number of branches: " << B1.getnumOfBranch() << endl;
   cout << "Number of branches taken: " << B1.getnumOfBranchTaken() << endl;
