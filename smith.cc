@@ -26,7 +26,7 @@ class SmithCounter{
     //state can not exceed 3;
     void incrementState(){
       state++;
-      if(state > 3 ) state = 3;
+      if(state > 3 ) state = 0;
     }
     //state can not get below 0;
     void decrementState(){
@@ -43,13 +43,14 @@ class SmithCounter{
     void updateState(bool taken){
       if(taken){
         incrementState();
-      }else{
+      }
+      else{
         decrementState();
       }
     }
 };
 
-// Used to keep track of branches.
+// Used to keep track of branches and states.
 class BranchTracker{
   private:
     int numOfBranch = 0;
@@ -57,7 +58,8 @@ class BranchTracker{
     int numOfCorrectPredictTakenBranch = 0;
     int numOfBranchNotTaken = 0;
     int numOfCorrectPredictNotTakenBranch = 0;
-    int correctPredictionRate = 0;
+    double correctPredictionRate = 0;
+
   public:
     //A bunch setter and getter functions
     void updateNumOfBranch(){
@@ -90,7 +92,7 @@ class BranchTracker{
     int getnumOfCorrectlyPredictNotTakenBranch(){
       return numOfCorrectPredictNotTakenBranch;
     }
-    int calcOverAllRate(){
+    double calcOverAllRate(){
       correctPredictionRate = ((double)(numOfCorrectPredictTakenBranch + numOfCorrectPredictNotTakenBranch) / (double)numOfBranch) * 100;
       return correctPredictionRate;
     }
@@ -99,24 +101,27 @@ class BranchTracker{
 
 int main(int argc, char* argv[]) {
 
-  SmithCounter S1;
+  SmithCounter S1[128];
   BranchTracker B1;
-  string someNumber;
+  int someNumber;
+  string line;
   string branch;
-  int b_ins;
-  bool state;
   bool Taken;
+  bool prediction;
+  char x;
 
    ifstream file("branch_trace.dat");
   //
-  //
-   while(getline(file, someNumber, ' ')) {
+    //getline reads the file
+   while(getline(file, line, ' ')) {
         getline(file, branch, '\n');
 
         if(branch == "T"){Taken = true;}
         else{Taken = false;}
+        someNumber = atoi(line.c_str());
+        //S1[someNumber%128].updateState(Taken);
 
-        S1.updateState(Taken);
+        prediction = S1[someNumber%128].getPrediction();
 
         // updates the number of Taken branch counter.
         if(branch.find('T') != std::string::npos){
@@ -127,13 +132,21 @@ int main(int argc, char* argv[]) {
           B1.updateNumOfBranchNotTaken();
         }
 
-        if(S1.getPrediction() && Taken){
+        if(prediction && Taken){
+          S1[someNumber%128].updateState(Taken);
           B1.updateNumOfCorrectlyPredictTakenBranch();
         }
-        if(!S1.getPrediction() && !Taken){
+        else if(!prediction && !Taken){
+          S1[someNumber%128].updateState(Taken);
           B1.updateNumOfCorrectlyPredictNotTakenBranch();
         }
-        // updates the number of not taken branch counter.
+        else if(prediction && !Taken){
+          S1[someNumber%128].updateState(Taken);
+        }
+        else if(!prediction && Taken){
+          S1[someNumber%128].updateState(Taken);
+        }
+        //updates the number of not taken branch counter.
       B1.updateNumOfBranch();
       }
 
