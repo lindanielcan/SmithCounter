@@ -8,13 +8,13 @@
 #include "smithcounter.h"
 #include "branchtracker.h"
 
-void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1);
+void executionMyBranchCounter(BranchTracker B1, SmithCounter S1);
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
 
-  SmithCounter S2[128];
+  SmithCounter S2;
   BranchTracker B2;
 
   executionMyBranchCounter(B2,S2);
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1){
+void executionMyBranchCounter(BranchTracker B1, SmithCounter S1){
   int someNumber;
   string line;
   string branch;
@@ -41,7 +41,7 @@ void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1){
         someNumber = atoi(line.c_str());
         //S1[someNumber%128].updateState(Taken);
 
-        prediction = S1[someNumber%128].getPrediction();
+        prediction = S1.getPrediction();
 
         // updates the number of Taken branch counter.
         if(branch.find('T') != std::string::npos){
@@ -53,18 +53,18 @@ void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1){
         }
 
         if(prediction && Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1.updateState(Taken);
           B1.updateNumOfCorrectlyPredictTakenBranch();
         }
         else if(!prediction && !Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1.updateState(Taken);
           B1.updateNumOfCorrectlyPredictNotTakenBranch();
         }
         else if(prediction && !Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1.updateState(Taken);
         }
         else if(!prediction && Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1.updateState(Taken);
         }
         //updates the number of not taken branch counter.
       B1.updateNumOfBranch();

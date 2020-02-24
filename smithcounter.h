@@ -12,7 +12,7 @@ class SmithCounter{
     // 10 weakly taken
     // 11 strongly taken
     // one bit for prediction bit, second bit for conviction bit.
-    int state = 3;
+    int state = 0;
   public:
     //state can not exceed 3;
     void incrementState();
