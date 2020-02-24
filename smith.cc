@@ -1,10 +1,12 @@
 //Roughly write out the project structure. Algorithms will be imported later.
 // I got a good reference from https://web.njit.edu/~rlopes/Mod5.3.pdf
+// Find project from this site http://kaschueller.people.ysu.edu/classes/s2020/5814/Branch_Prediction/branchProg.html
 
 // 00 strongly not taken
 // 01 weakly taken
 // 10 weakly taken
 // 11 strongly taken
+// one bit for prediction bit, second bit for conviction bit.
 
 #include <iostream>
 #include <string>
@@ -19,6 +21,9 @@ class SmithCounter{
   public:
     int getPrediction(){
       prediction >> 1;
+    }
+    int SaturatingCounter(){
+
     }
 };
 
@@ -64,8 +69,8 @@ class BranchTracker{
       return numOfCorrectPredictNotTakenBranch;
     }
     int calcOverAllRate(){
-      correctPredictionRate = ((numOfCorrectPredictTakenBranch + numOfCorrectPredictNotTakenBranch) / numOfBranch) * 100;
-      return correctPredictionRate;
+      //correctPredictionRate = ((numOfCorrectPredictTakenBranch + numOfCorrectPredictNotTakenBranch) / numOfBranch) * 100;
+      //return correctPredictionRate;
     }
 };
 
@@ -80,17 +85,20 @@ int main(int argc, char* argv[]) {
   bool prediction;
   bool predictionTaken;
 
-  ifstream file("branch_trace.dat");
+   ifstream file("branch_trace.dat");
+  //
+  //
+   while(getline(file, branch, ' ')) {
+  //
+        getline(file, state, '\n');
+        cout << state << endl;
+  //      b_ins = atoi(branch.c_str());
+  //      prediction = smith_array[(b_ins/4) % 128].getPrediction();
+  }
+  //
+  // file.close();
 
 
-  while(getline(file, branch, ' ')) {
-
-       getline(file, state, '\n');
-       b_ins = atoi(branch.c_str());
-       prediction = smith_array[(b_ins/4) % 128].getPrediction();
-   }
-
-  file.close();
 
   cout << "Number of branches: " << B1.getnumOfBranch() << endl;
   cout << "Number of branches taken: " << B1.getnumOfBranchTaken() << endl;
