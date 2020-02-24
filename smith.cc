@@ -2,11 +2,7 @@
 // I got a good reference from https://web.njit.edu/~rlopes/Mod5.3.pdf
 // Find project from this site http://kaschueller.people.ysu.edu/classes/s2020/5814/Branch_Prediction/branchProg.html
 
-// 00 strongly not taken
-// 01 weakly taken
-// 10 weakly taken
-// 11 strongly taken
-// one bit for prediction bit, second bit for conviction bit.
+
 
 #include <iostream>
 #include <string>
@@ -18,12 +14,38 @@ using namespace std;
 class SmithCounter{
   private:
     int prediction;
+    // four states.
+    // 00 strongly not taken
+    // 01 weakly taken
+    // 10 weakly taken
+    // 11 strongly taken
+    // one bit for prediction bit, second bit for conviction bit.
+    int state = 3;
   public:
-    int getPrediction(){
-      prediction >> 1;
-    }
-    int SaturatingCounter(){
 
+    //state can not exceed 3;
+    void incrementState(){
+      state++;
+      if(state > 3 ) state = 3;
+    }
+    //state can not get below 0;
+    void decrementState(){
+      state--;
+      if(state < 0) state = 0;
+    }
+    //if state is in 10 and 11, prediction is taken, if not, prediction is not taken.
+    bool getPrediction(){
+      if (state > 1) {prediction = true;}
+      else{prediction = false;}
+      return prediction;
+    }
+
+    void updateState(bool taken){
+      if(taken){
+        incrementState();
+      }else{
+        decrementState();
+      }
     }
 };
 
@@ -38,73 +60,92 @@ class BranchTracker{
     int correctPredictionRate = 0;
   public:
     //A bunch setter and getter functions
-    void setnumOfBranch(){
+    void updateNumOfBranch(){
       numOfBranch++;
     }
     int getnumOfBranch(){
       return numOfBranch;
     }
-    void setnumOfBranchTaken(){
+    void updateNumOfBranchTaken(){
       numOfBranchTaken++;
     }
     int getnumOfBranchTaken(){
       return numOfBranchTaken;
     }
-    void setnumOfCorrectPredictTakenBranch(){
+    void updateNumOfCorrectlyPredictTakenBranch(){
       numOfCorrectPredictTakenBranch++;
     }
-    int getnumOfCorrectPredictTakenBranch(){
+    int getnumOfCorrectlyPredictTakenBranch(){
       return numOfCorrectPredictTakenBranch;
     }
-    void setnumOfBranchNotTaken(){
+    void updateNumOfBranchNotTaken(){
       numOfBranchNotTaken++;
     }
     int getnumOfBranchNotTaken(){
       return numOfBranchNotTaken;
     }
-    void setnumOfCorrectPredictNotTakenBranch(){
+    void updateNumOfCorrectlyPredictNotTakenBranch(){
       numOfCorrectPredictNotTakenBranch++;
     }
-    int getnumOfCorrectPredictNotTakenBranch(){
+    int getnumOfCorrectlyPredictNotTakenBranch(){
       return numOfCorrectPredictNotTakenBranch;
     }
     int calcOverAllRate(){
-      //correctPredictionRate = ((numOfCorrectPredictTakenBranch + numOfCorrectPredictNotTakenBranch) / numOfBranch) * 100;
-      //return correctPredictionRate;
+      correctPredictionRate = ((double)(numOfCorrectPredictTakenBranch + numOfCorrectPredictNotTakenBranch) / (double)numOfBranch) * 100;
+      return correctPredictionRate;
     }
 };
 
 
 int main(int argc, char* argv[]) {
 
-  SmithCounter S1[128];
+  SmithCounter S1;
   BranchTracker B1;
+  string someNumber;
   string branch;
-  string state;
   int b_ins;
-  bool prediction;
-  bool predictionTaken;
+  bool state;
+  bool Taken;
 
    ifstream file("branch_trace.dat");
   //
   //
-   while(getline(file, branch, ' ')) {
-  //
-        getline(file, state, '\n');
-        cout << state << endl;
-  //      b_ins = atoi(branch.c_str());
-  //      prediction = smith_array[(b_ins/4) % 128].getPrediction();
-  }
-  //
-  // file.close();
+   while(getline(file, someNumber, ' ')) {
+        getline(file, branch, '\n');
+
+        if(branch == "T"){Taken = true;}
+        else{Taken = false;}
+
+        S1.updateState(Taken);
+
+        // updates the number of Taken branch counter.
+        if(branch.find('T') != std::string::npos){
+          B1.updateNumOfBranchTaken();
+        }
+        // updates the number of not taken branch counter.
+        if(branch.find('N') != std::string::npos){
+          B1.updateNumOfBranchNotTaken();
+        }
+
+        if(S1.getPrediction() && Taken){
+          B1.updateNumOfCorrectlyPredictTakenBranch();
+        }
+        if(!S1.getPrediction() && !Taken){
+          B1.updateNumOfCorrectlyPredictNotTakenBranch();
+        }
+        // updates the number of not taken branch counter.
+      B1.updateNumOfBranch();
+      }
+
+   file.close();
 
 
 
   cout << "Number of branches: " << B1.getnumOfBranch() << endl;
   cout << "Number of branches taken: " << B1.getnumOfBranchTaken() << endl;
-  cout << "Number taken branches correctly predicted: " << B1.getnumOfCorrectPredictTakenBranch() << endl;
+  cout << "Number taken branches correctly predicted: " << B1.getnumOfCorrectlyPredictTakenBranch() << endl;
   cout << "Number of branches not taken: " << B1.getnumOfBranchNotTaken() << endl;
-  cout << "Number not taken branches correctly predicted: " << B1.getnumOfCorrectPredictNotTakenBranch() <<endl << endl;
+  cout << "Number not taken branches correctly predicted: " << B1.getnumOfCorrectlyPredictNotTakenBranch() <<endl << endl;
   cout << "Overall rate of correct predictions: " << B1.calcOverAllRate() << "%" << endl;
   return 0;
 }
