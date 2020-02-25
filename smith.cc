@@ -3,7 +3,6 @@
 // Find project from this site http://kaschueller.people.ysu.edu/classes/s2020/5814/Branch_Prediction/branchProg.html
 
 #include <iostream>
-#include <string>
 #include <fstream>
 #include "smithcounter.h"
 #include "branchtracker.h"
