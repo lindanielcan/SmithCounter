@@ -36,41 +36,41 @@ void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1){
    while(getline(file, line, ' ')) {
         getline(file, branch, '\n');
 
-        if(branch == "T"){Taken = true;}
-        else{Taken = false;}
-        someNumber = atoi(line.c_str());
+        someNumber = atoi(line.c_str()) >> 2;
         //S1[someNumber%128].updateState(Taken);
 
         prediction = S1[someNumber%128].getPrediction();
 
         // updates the number of Taken branch counter.
         if(branch.find('T') != std::string::npos){
+          Taken = true;
           B1.updateNumOfBranchTaken();
         }
         // updates the number of not taken branch counter.
-        if(branch.find('N') != std::string::npos){
+        else if(branch.find('N') != std::string::npos){
+          Taken = false;
           B1.updateNumOfBranchNotTaken();
         }
 
         if(prediction && Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1[someNumber%128].updateState(true);
           B1.updateNumOfCorrectlyPredictTakenBranch();
         }
         else if(!prediction && !Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1[someNumber%128].updateState(false);
           B1.updateNumOfCorrectlyPredictNotTakenBranch();
         }
         else if(prediction && !Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1[someNumber%128].updateState(false);
         }
         else if(!prediction && Taken){
-          S1[someNumber%128].updateState(Taken);
+          S1[someNumber%128].updateState(true);
         }
-        //updates the number of not taken branch counter.
+        //updates the number of branch.
       B1.updateNumOfBranch();
       }
 
-   file.close();
+  file.close();
 
   cout << "Number of branches: " << B1.getnumOfBranch() << endl;
   cout << "Number of branches taken: " << B1.getnumOfBranchTaken() << endl;
