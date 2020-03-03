@@ -1,81 +1,64 @@
-//Roughly write out the project structure. Algorithms will be imported later.
-// I got a good reference from https://web.njit.edu/~rlopes/Mod5.3.pdf
-// Find project from this site http://kaschueller.people.ysu.edu/classes/s2020/5814/Branch_Prediction/branchProg.html
-
-#include <iostream>
 #include <string>
+#include <iostream>
 #include <fstream>
-#include "smithcounter.h"
+#include <sstream>
+#include <string>
 #include "branchtracker.h"
-
-void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1);
+#include "SmithCounter.h"
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
+void execute(BranchTracker B1, SmithCounter *S1);
 
+int main() {
   SmithCounter S2[128];
   BranchTracker B2;
 
-  executionMyBranchCounter(B2,S2);
-
+  execute(B2, S2);
 
   return 0;
 }
 
-void executionMyBranchCounter(BranchTracker B1, SmithCounter *S1){
-  int someNumber;
-  string line;
-  string branch;
-  bool Taken;
-  bool prediction;
+void execute(BranchTracker B1, SmithCounter *S1){
+  string behavior, line;
+  unsigned long long addr;
+  bool taken;
+  ifstream infile("branch_trace.dat");
+  for(int i = 0; i < 128; i++) S1[i].setPrediction();
+  while(getline(infile, line)) {
+    stringstream s(line);
+    s >> addr >> behavior;
+    int index = addr % 128;
+    int tval = S1[index].getPrediction();  // get prediction
 
-   ifstream file("branch_trace.dat");
-  //
-    //getline reads the file
-   while(getline(file, line, ' ')) {
-        getline(file, branch, '\n');
+    if(behavior == "N") {taken = false;}
+    else {taken = true;}
 
-        someNumber = atoi(line.c_str()) >> 2;
-        //S1[someNumber%128].updateState(Taken);
+    if(taken && tval == 1){
+      S1[index].updatePrediction(taken);
+      B1.updateNumOfBranchTaken();
+      B1.updateNumOfCorrectlyPredictTakenBranch();
+    }else if (taken && tval == 0){
+      B1.updateNumOfBranchTaken();
+      S1[index].updatePrediction(taken);
+    }else if (!taken && tval == 0){
+      S1[index].updatePrediction(taken);
+      B1.updateNumOfBranchNotTaken();
+      B1.updateNumOfCorrectlyPredictNotTakenBranch();
+    }else if (!taken && tval == 1){
+      B1.updateNumOfBranchNotTaken();
+      S1[index].updatePrediction(taken);
+    }
 
-        prediction = S1[someNumber%128].getPrediction();
+    B1.updateNumOfBranch();
+  }
 
-        // updates the number of Taken branch counter.
-        if(branch.find('T') != std::string::npos){
-          Taken = true;
-          B1.updateNumOfBranchTaken();
-        }
-        // updates the number of not taken branch counter.
-        else if(branch.find('N') != std::string::npos){
-          Taken = false;
-          B1.updateNumOfBranchNotTaken();
-        }
-
-        if(prediction && Taken){
-          S1[someNumber%128].updateState(true);
-          B1.updateNumOfCorrectlyPredictTakenBranch();
-        }
-        else if(!prediction && !Taken){
-          S1[someNumber%128].updateState(false);
-          B1.updateNumOfCorrectlyPredictNotTakenBranch();
-        }
-        else if(prediction && !Taken){
-          S1[someNumber%128].updateState(false);
-        }
-        else if(!prediction && Taken){
-          S1[someNumber%128].updateState(true);
-        }
-        //updates the number of branch.
-      B1.updateNumOfBranch();
-      }
-
-  file.close();
+  infile.close();
 
   cout << "Number of branches: " << B1.getnumOfBranch() << endl;
   cout << "Number of branches taken: " << B1.getnumOfBranchTaken() << endl;
   cout << "Number taken branches correctly predicted: " << B1.getnumOfCorrectlyPredictTakenBranch() << endl;
   cout << "Number of branches not taken: " << B1.getnumOfBranchNotTaken() << endl;
-  cout << "Number not taken branches correctly predicted: " << B1.getnumOfCorrectlyPredictNotTakenBranch() <<endl << endl;
-  cout << "Overall rate of correct predictions: " << B1.calcOverAllRate() << "%" << endl;
+  cout << "Number not taken branches correctly predicted: " << B1.getnumOfCorrectlyPredictNotTakenBranch()  <<endl << endl;
+  cout << "Overall rate of correct predictions: " << B1.calcOverAllRate() << endl;
 }

@@ -1,29 +1,27 @@
-#include "smithcounter.h"
-
-//state can not exceed 3;
-void SmithCounter::incrementState(){
-  state++;
-  if(state > 3 ) state = 0;
-}
-
-//state can not get below 0;
-void SmithCounter::decrementState(){
-  state--;
-  if(state < 0) state = 0;
-}
+#include "SmithCounter.h"
 
 //if state is in 10 and 11, prediction is taken, if not, prediction is not taken.
-bool SmithCounter::getPrediction(){
-  if (state > 1) {prediction = true;}
-  else{prediction = false;}
-  return prediction;
+int SmithCounter::getPrediction(){
+  //11 >> 1 = 1
+  //10 >> 1 = 1
+  //01 >> 1 = 0
+  //00 >> 1 = 0
+  return prediction >> 1;
 }
 
-void SmithCounter::updateState(bool taken){
+void SmithCounter::setPrediction(){
+  prediction = 0;
+}
+
+void SmithCounter::updatePrediction(bool taken){
   if(taken){
-    incrementState();
+    prediction++;
+    if(prediction > 3) prediction = 3;
   }
-  else{
-    decrementState();
+  if (!taken && prediction > 0){
+    prediction--;
+    if(prediction < 0){
+      prediction = 0;
+    }
   }
 }

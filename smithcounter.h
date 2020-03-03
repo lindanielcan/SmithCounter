@@ -1,8 +1,8 @@
-#ifndef H_SMITHCOUTER_H
-#define	H_SMITHCOUTER_H
+#ifndef H_SMITHCOUNTER_H
+#define	H_SMITHCOUNTER_H
 
-#include<iostream>
 //Smith counter.
+
 class SmithCounter{
   private:
     int prediction;
@@ -12,16 +12,11 @@ class SmithCounter{
     // 10 weakly taken
     // 11 strongly taken
     // one bit for prediction bit, second bit for conviction bit.
-    int state = 0;
   public:
-    //state can not exceed 3;
-    void incrementState();
-    //state can not get below 0;
-    void decrementState();
     //if state is in 10 and 11, prediction is taken, if not, prediction is not taken.
-    bool getPrediction();
-
-    void updateState(bool taken);
+    int getPrediction();
+    void setPrediction();
+    void updatePrediction(bool taken);
 };
 
 #endif
